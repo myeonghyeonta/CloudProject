@@ -18,13 +18,9 @@ import java.lang.String;
 public class App 
 {
 	static AmazonEC2      ec2;
-/*	private static void init() throws Exception {
-		/*
-		 * The ProfileCredentialsProvider will return your [default]
-		 * credential profile by reading from the credentials file located at
-		 * (~/.aws/credentials).
-		 */
-	/*	ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();
+	private static void init() throws Exception {
+		
+		ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();
 		try {
 			credentialsProvider.getCredentials();
 		} catch (Exception e) {
@@ -38,9 +34,10 @@ public class App
 			.withCredentials(credentialsProvider)
 			.withRegion("us-east-2") 
 			.build();
-	}*/
+	}
 	public static void main(String[] args) throws Exception {
-		//init();
+		init();
+
 		Scanner menu = new Scanner(System.in);
 		Scanner id_string = new Scanner(System.in);
 		int number = 0;
@@ -63,18 +60,20 @@ public class App
 			System.out.print("Enter an integer: ");
 			number=menu.nextInt(); 
 				switch(number) {
-					case 1: 
-						System.out.println("hello");//listInstances();
+					case 1:
+						System.out.println("case 1");
+						listInstances();
 						break;
 					case 99:
 						System.out.println("quit");
-						return;
+						System.exit(0);
 					default:
 						System.out.println("Incorrect input.");
 				}
 		}
+
 	}
-/*	public static void listInstances()
+	public static void listInstances()
 	{
 		System.out.println("Listing instances....");
 		boolean done = false;
@@ -102,5 +101,5 @@ public class App
 				done = true;
 			}
 		}
-	}*/
+	}
 }
