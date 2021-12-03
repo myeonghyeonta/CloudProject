@@ -16,6 +16,16 @@ import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.RebootInstancesResult;
+import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
+import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.services.ec2.model.Tag;
+import com.amazonaws.services.ec2.model.CreateTagsRequest;
+import com.amazonaws.services.ec2.model.CreateTagsResult;
+import com.amazonaws.services.ec2.model.DescribeRegionsResult;
+import com.amazonaws.services.ec2.model.Region;
+import com.amazonaws.services.ec2.model.AvailabilityZone;
+import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 
 
 /**
@@ -141,7 +151,20 @@ public class App
 
 	public static void availableZones(){
 		System.out.println("Avilable zones....");
+	
+		DescribeAvailabilityZonesResult zones_response =
+            ec2.describeAvailabilityZones();
 
+        for(AvailabilityZone zone : zones_response.getAvailabilityZones()) {
+            System.out.printf(
+                "Found availability zone %s " +
+                "with status %s " +
+                "in region %s",
+                zone.getZoneName(),
+                zone.getState(),
+                zone.getRegionName());
+			System.out.println();
+        }
 	}
 
 	public static void startInstance(){
@@ -178,6 +201,17 @@ public class App
 
 	public static void availableRegions(){
 		System.out.println("Available regions....");
+
+		DescribeRegionsResult regions_response = ec2.describeRegions();
+
+        for(Region region : regions_response.getRegions()) {
+            System.out.printf(
+                "Found region %s " +
+                "with endpoint %s",
+                region.getRegionName(),
+                region.getEndpoint());
+			System.out.println();
+        }
 	}
 
 	public static void stopInstance(){
@@ -212,7 +246,38 @@ public class App
 	}
 
 	public static void createInstance(){
+		Scanner scanner = new Scanner(System.in);
 		System.out.println("Create instance....");
+		System.out.print("Enter name : ");
+		String name;
+		name = scanner.nextLine();
+		System.out.print("Enter ami_id : ");
+		String ami_id;
+		ami_id = scanner.nextLine();
+
+		RunInstancesRequest run_request = new RunInstancesRequest()
+            .withImageId(ami_id)
+            .withInstanceType(InstanceType.T1Micro)
+            .withMaxCount(1)
+            .withMinCount(1);
+
+        RunInstancesResult run_response = ec2.runInstances(run_request);
+
+        String reservation_id = run_response.getReservation().getInstances().get(0).getInstanceId();
+
+        Tag tag = new Tag()
+            .withKey("Name")
+            .withValue(name);
+
+        CreateTagsRequest tag_request = new CreateTagsRequest()
+            .withResources(reservation_id)
+            .withTags(tag);
+
+        CreateTagsResult tag_response = ec2.createTags(tag_request);
+
+        System.out.printf(
+            "Successfully started EC2 instance %s based on AMI %s",
+            reservation_id, ami_id);
 	}
 
 	public static void rebootInstance(){
