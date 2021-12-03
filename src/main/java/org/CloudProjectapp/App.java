@@ -14,6 +14,8 @@ import com.amazonaws.services.ec2.model.DryRunResult;
 import com.amazonaws.services.ec2.model.DryRunSupportedRequest;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
+import com.amazonaws.services.ec2.model.RebootInstancesRequest;
+import com.amazonaws.services.ec2.model.RebootInstancesResult;
 
 
 /**
@@ -24,7 +26,7 @@ public class App
 {
 	static AmazonEC2      ec2;
 	private static void init() throws Exception {
-		
+
 		ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();
 		try {
 			credentialsProvider.getCredentials();
@@ -64,46 +66,46 @@ public class App
 			System.out.println("------------------------------------------------------------");
 			System.out.print("Enter an integer: ");
 			number=menu.nextInt(); 
-				switch(number) {
-					case 1:
-						System.out.println("case 1");
-						listInstances();
-						break;
-					case 2:
-						System.out.println("case 2");
-						availableZones();
-						break;
-					case 3:
-						System.out.println("case 3");
-						startInstance();
-						break;
-					case 4:
-						System.out.println("case 4");
-						availableRegions();
-						break;
-					case 5:
-						System.out.println("case 5");
-						stopInstance();
-						break;
-					case 6:
-						System.out.println("case 6");
-						createInstance();
-						break;
-					case 7:
-						System.out.println("case 7");
-						rebootInstance();
-						break;
-					case 8:
-						System.out.println("case 8");
-						listImages();
-						break;
-					case 99:
-						System.out.println("quit");
-						System.exit(0);
-					default:
-						System.out.println("Incorrect input.");
-						break;
-				}
+			switch(number) {
+				case 1:
+					System.out.println("case 1");
+					listInstances();
+					break;
+				case 2:
+					System.out.println("case 2");
+					availableZones();
+					break;
+				case 3:
+					System.out.println("case 3");
+					startInstance();
+					break;
+				case 4:
+					System.out.println("case 4");
+					availableRegions();
+					break;
+				case 5:
+					System.out.println("case 5");
+					stopInstance();
+					break;
+				case 6:
+					System.out.println("case 6");
+					createInstance();
+					break;
+				case 7:
+					System.out.println("case 7");
+					rebootInstance();
+					break;
+				case 8:
+					System.out.println("case 8");
+					listImages();
+					break;
+				case 99:
+					System.out.println("quit");
+					System.exit(0);
+				default:
+					System.out.println("Incorrect input.");
+					break;
+			}
 		}
 
 	}
@@ -136,56 +138,116 @@ public class App
 			}
 		}
 	}
+
 	public static void availableZones(){
-	System.out.println("Avilable zones....");
+		System.out.println("Avilable zones....");
 
 	}
+
 	public static void startInstance(){
-	Scanner scanner = new Scanner(System.in);
-	System.out.println("Start instance....");
-	System.out.print("Enter instance id: ");
-	String instance;
-	instance = scanner.nextLine();
-	
-	DryRunSupportedRequest<StartInstancesRequest> dry_request =
-            () -> {
-            StartInstancesRequest request = new StartInstancesRequest()
-                .withInstanceIds(instance);
+		Scanner scanner = new Scanner(System.in);
+		System.out.println("Start instance....");
+		System.out.print("Enter instance id: ");
+		String instance_id;
+		instance_id = scanner.nextLine();
 
-            return request.getDryRunRequest();
-        };
+		DryRunSupportedRequest<StartInstancesRequest> dry_request =
+			() -> {
+				StartInstancesRequest request = new StartInstancesRequest()
+					.withInstanceIds(instance_id);
 
-	DryRunResult dry_response = ec2.dryRun(dry_request);
+				return request.getDryRunRequest();
+			};
 
-        if(!dry_response.isSuccessful()) {
-            System.out.printf(
-                "Failed dry run to start instance %s", instance);
+		DryRunResult dry_response = ec2.dryRun(dry_request);
 
-            throw dry_response.getDryRunResponse();
-        }
+		if(!dry_response.isSuccessful()) {
+			System.out.printf(
+					"Failed dry run to start instance %s", instance_id);
 
-        StartInstancesRequest request = new StartInstancesRequest()
-            .withInstanceIds(instance);
+			throw dry_response.getDryRunResponse();
+		}
 
-        ec2.startInstances(request);
+		StartInstancesRequest request = new StartInstancesRequest()
+			.withInstanceIds(instance_id);
 
-        System.out.printf("Successfully started instance %s", instance);
+		ec2.startInstances(request);
 
+		System.out.printf("Successfully started instance %s", instance_id);
 	}
+
 	public static void availableRegions(){
-	System.out.println("Available regions....");
+		System.out.println("Available regions....");
 	}
-	public static void stopInstance(){
-	System.out.println("Stop instance....");
 
+	public static void stopInstance(){
+		Scanner scanner = new Scanner(System.in);
+		System.out.println("Stop instance....");
+		System.out.print("Enter instance id: ");
+		String instance_id;
+		instance_id = scanner.nextLine();
+
+		DryRunSupportedRequest<StopInstancesRequest> dry_request =
+			() -> {
+				StopInstancesRequest request = new StopInstancesRequest()
+					.withInstanceIds(instance_id);
+
+				return request.getDryRunRequest();
+			};
+
+		DryRunResult dry_response = ec2.dryRun(dry_request);
+
+		if(!dry_response.isSuccessful()) {
+			System.out.printf(
+					"Failed dry run to stop instance %s", instance_id);
+			throw dry_response.getDryRunResponse();
+		}
+
+		StopInstancesRequest request = new StopInstancesRequest()
+			.withInstanceIds(instance_id);
+
+		ec2.stopInstances(request);
+
+		System.out.printf("Successfully stop instance %s", instance_id);
 	}
+
 	public static void createInstance(){
-	System.out.println("Create instance....");
+		System.out.println("Create instance....");
 	}
+
 	public static void rebootInstance(){
-	System.out.println("Reboot instance....");
+		Scanner scanner = new Scanner(System.in);
+		System.out.println("Reboot instance....");
+		System.out.print("Enter instance id: ");
+		String instance_id;
+		instance_id = scanner.nextLine();
+
+
+		DryRunSupportedRequest<RebootInstancesRequest> dry_request =
+			() -> {
+				RebootInstancesRequest request = new RebootInstancesRequest()
+					.withInstanceIds(instance_id);
+
+				return request.getDryRunRequest();
+			};
+
+		DryRunResult dry_response = ec2.dryRun(dry_request);
+
+		if(!dry_response.isSuccessful()) {
+			System.out.printf(
+					"Failed dry run to reboot instance %s", instance_id);
+
+			throw dry_response.getDryRunResponse();
+		}
+
+		RebootInstancesRequest request = new RebootInstancesRequest()
+			.withInstanceIds(instance_id);
+
+		ec2.rebootInstances(request);
+
+		System.out.printf("Successfully rebooted instance %s", instance_id);
 	}
-	public static void listImages(){
-	System.out.println("List images....");
+		public static void listImages(){
+			System.out.println("List images....");
+		}
 	}
-}
