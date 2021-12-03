@@ -26,7 +26,9 @@ import com.amazonaws.services.ec2.model.DescribeRegionsResult;
 import com.amazonaws.services.ec2.model.Region;
 import com.amazonaws.services.ec2.model.AvailabilityZone;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
-
+import com.amazonaws.services.ec2.model.DescribeImagesRequest;
+import com.amazonaws.services.ec2.model.DescribeImagesResult;
+import com.amazonaws.services.ec2.model.Image;
 
 /**
  * CloudProject
@@ -151,20 +153,20 @@ public class App
 
 	public static void availableZones(){
 		System.out.println("Avilable zones....");
-	
-		DescribeAvailabilityZonesResult zones_response =
-            ec2.describeAvailabilityZones();
 
-        for(AvailabilityZone zone : zones_response.getAvailabilityZones()) {
-            System.out.printf(
-                "Found availability zone %s " +
-                "with status %s " +
-                "in region %s",
-                zone.getZoneName(),
-                zone.getState(),
-                zone.getRegionName());
+		DescribeAvailabilityZonesResult zones_response =
+			ec2.describeAvailabilityZones();
+
+		for(AvailabilityZone zone : zones_response.getAvailabilityZones()) {
+			System.out.printf(
+					"Found availability zone %s " +
+					"with status %s " +
+					"in region %s",
+					zone.getZoneName(),
+					zone.getState(),
+					zone.getRegionName());
 			System.out.println();
-        }
+		}
 	}
 
 	public static void startInstance(){
@@ -204,14 +206,14 @@ public class App
 
 		DescribeRegionsResult regions_response = ec2.describeRegions();
 
-        for(Region region : regions_response.getRegions()) {
-            System.out.printf(
-                "Found region %s " +
-                "with endpoint %s",
-                region.getRegionName(),
-                region.getEndpoint());
+		for(Region region : regions_response.getRegions()) {
+			System.out.printf(
+					"Found region %s " +
+					"with endpoint %s",
+					region.getRegionName(),
+					region.getEndpoint());
 			System.out.println();
-        }
+		}
 	}
 
 	public static void stopInstance(){
@@ -256,28 +258,28 @@ public class App
 		ami_id = scanner.nextLine();
 
 		RunInstancesRequest run_request = new RunInstancesRequest()
-            .withImageId(ami_id)
-            .withInstanceType(InstanceType.T1Micro)
-            .withMaxCount(1)
-            .withMinCount(1);
+			.withImageId(ami_id)
+			.withInstanceType(InstanceType.T1Micro)
+			.withMaxCount(1)
+			.withMinCount(1);
 
-        RunInstancesResult run_response = ec2.runInstances(run_request);
+		RunInstancesResult run_response = ec2.runInstances(run_request);
 
-        String reservation_id = run_response.getReservation().getInstances().get(0).getInstanceId();
+		String reservation_id = run_response.getReservation().getInstances().get(0).getInstanceId();
 
-        Tag tag = new Tag()
-            .withKey("Name")
-            .withValue(name);
+		Tag tag = new Tag()
+			.withKey("Name")
+			.withValue(name);
 
-        CreateTagsRequest tag_request = new CreateTagsRequest()
-            .withResources(reservation_id)
-            .withTags(tag);
+		CreateTagsRequest tag_request = new CreateTagsRequest()
+			.withResources(reservation_id)
+			.withTags(tag);
 
-        CreateTagsResult tag_response = ec2.createTags(tag_request);
+		CreateTagsResult tag_response = ec2.createTags(tag_request);
 
-        System.out.printf(
-            "Successfully started EC2 instance %s based on AMI %s",
-            reservation_id, ami_id);
+		System.out.printf(
+				"Successfully started EC2 instance %s based on AMI %s",
+				reservation_id, ami_id);
 	}
 
 	public static void rebootInstance(){
@@ -312,7 +314,22 @@ public class App
 
 		System.out.printf("Successfully rebooted instance %s", instance_id);
 	}
-		public static void listImages(){
-			System.out.println("List images....");
+	public static void listImages(){
+		System.out.println("List images....");
+		DescribeImagesResult response = ec2.describeImages();
+		int count = 0;
+		for(Image image : response.getImages()) {
+			System.out.printf(
+					"[ImageID] %s "+
+					"[Name] %s "+
+					"[Owner] %s ",
+					image.getImageId(),
+					image.getName(),
+					image.getOwnerId());
+			System.out.println();
+			count++;
+			if(count == 9)
+				break;
 		}
 	}
+}
