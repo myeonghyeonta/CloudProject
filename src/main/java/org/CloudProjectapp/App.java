@@ -10,6 +10,11 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.Instance;
 import java.lang.String;
+import com.amazonaws.services.ec2.model.DryRunResult;
+import com.amazonaws.services.ec2.model.DryRunSupportedRequest;
+import com.amazonaws.services.ec2.model.StartInstancesRequest;
+import com.amazonaws.services.ec2.model.StopInstancesRequest;
+
 
 /**
  * CloudProject
@@ -64,11 +69,40 @@ public class App
 						System.out.println("case 1");
 						listInstances();
 						break;
+					case 2:
+						System.out.println("case 2");
+						availableZones();
+						break;
+					case 3:
+						System.out.println("case 3");
+						startInstance();
+						break;
+					case 4:
+						System.out.println("case 4");
+						availableRegions();
+						break;
+					case 5:
+						System.out.println("case 5");
+						stopInstance();
+						break;
+					case 6:
+						System.out.println("case 6");
+						createInstance();
+						break;
+					case 7:
+						System.out.println("case 7");
+						rebootInstance();
+						break;
+					case 8:
+						System.out.println("case 8");
+						listImages();
+						break;
 					case 99:
 						System.out.println("quit");
 						System.exit(0);
 					default:
 						System.out.println("Incorrect input.");
+						break;
 				}
 		}
 
@@ -101,5 +135,57 @@ public class App
 				done = true;
 			}
 		}
+	}
+	public static void availableZones(){
+	System.out.println("Avilable zones....");
+
+	}
+	public static void startInstance(){
+	Scanner scanner = new Scanner(System.in);
+	System.out.println("Start instance....");
+	System.out.print("Enter instance id: ");
+	String instance;
+	instance = scanner.nextLine();
+	
+	DryRunSupportedRequest<StartInstancesRequest> dry_request =
+            () -> {
+            StartInstancesRequest request = new StartInstancesRequest()
+                .withInstanceIds(instance);
+
+            return request.getDryRunRequest();
+        };
+
+	DryRunResult dry_response = ec2.dryRun(dry_request);
+
+        if(!dry_response.isSuccessful()) {
+            System.out.printf(
+                "Failed dry run to start instance %s", instance);
+
+            throw dry_response.getDryRunResponse();
+        }
+
+        StartInstancesRequest request = new StartInstancesRequest()
+            .withInstanceIds(instance);
+
+        ec2.startInstances(request);
+
+        System.out.printf("Successfully started instance %s", instance);
+
+	}
+	public static void availableRegions(){
+	System.out.println("Available regions....");
+	}
+	public static void stopInstance(){
+	System.out.println("Stop instance....");
+
+	}
+	public static void createInstance(){
+	System.out.println("Create instance....");
+	}
+	public static void rebootInstance(){
+	System.out.println("Reboot instance....");
+	}
+	public static void listImages(){
+	System.out.println("List images....");
 	}
 }
